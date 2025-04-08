@@ -52,5 +52,68 @@
       <button type="submit">Submit Registration</button>
     </form>
   </div>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+  
+    // Your Firebase config (replace with yours)
+    const firebaseConfig = {
+      apiKey: "YOURAIzaSyB-C0gUQ-1Q07xMgL47cjALq0scsVWcSNY",
+      authDomain: "recoveryconferencemalawi.firebaseapp.com",
+      projectId: "recoveryconferencemalawi",
+      storageBucket: "recoveryconferencemalawi.firebasestorage.app",
+      messagingSenderId: "8948794892",
+      appId: "1:8948794892:web:b1e6eb5efa2f4166ab1029"
+    };
+  
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+  
+    // Form handling
+    const form = document.querySelector("form");
+  
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+  
+      const name = form.name.value;
+      const gender = form.gender.value;
+      const email = form.email.value;
+      const contact = form.contact.value;
+      const accommodation = form.accommodation.value;
+      const paymentOption = form.paymentOption.value;
+      const file = form.proof.files[0];
+  
+      let fileUrl = "";
+  
+      try {
+        if (file) {
+          const storageRef = ref(storage, `payments/${Date.now()}-${file.name}`);
+          const snapshot = await uploadBytes(storageRef, file);
+          fileUrl = await getDownloadURL(snapshot.ref);
+        }
+  
+        await addDoc(collection(db, "registrations"), {
+          name,
+          gender,
+          email,
+          contact,
+          accommodation,
+          paymentOption,
+          proofUrl: fileUrl,
+          submittedAt: new Date().toISOString()
+        });
+  
+        alert("Registration submitted successfully!");
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alert("Error submitting form. Please try again.");
+      }
+    });
+  </script>  
 </body>
 </html>

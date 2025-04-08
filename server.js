@@ -7,7 +7,6 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require("fs");
-const path = require("path");
 
 console.log("🔐 Initializing Firebase Admin...");
 

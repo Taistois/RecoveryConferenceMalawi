@@ -1,38 +1,35 @@
+require("dotenv").config(); // Load .env variables
 const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Log for debugging
-console.log("🔐 Decoding service account...");
+console.log("🔐 Initializing Firebase Admin...");
 
-const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString("utf8");
+// ✅ Use the raw service account file (place it in the same folder as server.js)
+const serviceAccount = require("./serviceAccountKey.json");
 
-console.log("✅ Decoded key preview:", decoded.substring(0, 100)); // Preview part of it
-
-const serviceAccount = JSON.parse(decoded);
-
+// ✅ Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
-console.log("✅ Firebase initialized.");
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static("public"));
 
-// Serve the frontend
+// ✅ Middleware
+app.use(cors());
+app.use(express.json()); // Built-in body parser
+app.use(express.static("public")); // To serve index.html and static assets
+
+// 🧾 Serve Frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Registration endpoint
+// 📨 Registration endpoint
 app.post("/register", async (req, res) => {
   const { name, gender, email, contact } = req.body;
 
@@ -55,11 +52,12 @@ app.post("/register", async (req, res) => {
 
     return res.status(200).json({ message: "Registration successful!" });
   } catch (error) {
-    console.error("Firestore error:", error);
+    console.error("❌ Firestore error:", error);
     return res.status(500).json({ message: "An error occurred while registering. Try again." });
   }
 });
 
+// 🚀 Start Server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

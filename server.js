@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 console.log("🔐 Initializing Firebase Admin...");
 
 // ✅ Use the raw service account file (place it in the same folder as server.js)
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("/etc/secrets/serviceAccountKey.json");
 
 // ✅ Initialize Firebase Admin SDK
 admin.initializeApp({

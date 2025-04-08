@@ -8,11 +8,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Load Firebase service account
-const serviceAccount = require("./serviceAccountKey.json");
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json'); // use correct path
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount)
 });
+
 const db = admin.firestore();
 
 // Middleware

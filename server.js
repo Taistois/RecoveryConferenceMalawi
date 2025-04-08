@@ -3,9 +3,11 @@ const express = require("express");
 const admin = require("firebase-admin");
 const path = require("path");
 const cors = require("cors");
-
+const nodemailer = require("nodemailer");
 const app = express();
 const PORT = process.env.PORT || 3000;
+const fs = require("fs");
+const path = require("path");
 
 console.log("🔐 Initializing Firebase Admin...");
 
@@ -18,6 +20,15 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
+
+// ✅ Configure Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // ✅ Middleware
 app.use(cors());
@@ -49,6 +60,17 @@ app.post("/register", async (req, res) => {
       contact,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
+
+// Inside your /register route
+const emailHTML = fs.readFileSync(path.join(__dirname, "emailTemplate.html"), "utf8");
+const customizedHTML = emailHTML.replace("{{name}}", name);
+
+const mailOptions = {
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: "✅ Recovery Conference Registration Confirmation",
+  html: customizedHTML,
+};
 
     return res.status(200).json({ message: "Registration successful!" });
   } catch (error) {

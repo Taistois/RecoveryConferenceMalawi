@@ -7,31 +7,32 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize Firebase Admin
+// Load Firebase service account
 const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
 const db = admin.firestore();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("public")); // Serves files in /public folder
+app.use(express.static("public")); // Serve index.html & assets
 
-// Serve index.html
+// Serve the frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Registration Endpoint
+// Registration endpoint
 app.post("/register", async (req, res) => {
   const { name, gender, email, contact } = req.body;
 
+  console.log("Incoming Registration:", req.body);
+
   try {
-    // Check for duplicate email
+    // Check if user already registered with same email
     const existing = await db.collection("registrations")
       .where("email", "==", email)
       .get();
@@ -40,7 +41,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "You've already registered with this email." });
     }
 
-    // Save to Firestore
+    // Add to Firestore
     await db.collection("registrations").add({
       name,
       gender,
@@ -50,13 +51,13 @@ app.post("/register", async (req, res) => {
     });
 
     return res.status(200).json({ message: "Registration successful!" });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Something went wrong!" });
+  } catch (error) {
+    console.error("🔥 Firestore error:", error);
+    return res.status(500).json({ message: "An error occurred while registering. Try again." });
   }
 });
 
-// Start Server
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });

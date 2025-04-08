@@ -2,19 +2,28 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
+const path = require("path"); // Required to serve HTML
 const app = express();
 const PORT = 3000;
 
 // Initialize Firebase Admin
-const serviceAccount = require("./serviceAccountKey.json"); // from Firebase Console
+const serviceAccount = require("./serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static("public")); // Serves everything in /public folder
 
+// Serve your HTML form
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Registration Endpoint
 app.post("/register", async (req, res) => {
   const { name, gender, email, contact, paymentOption, proofUrl } = req.body;
 
@@ -46,4 +55,5 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start server
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

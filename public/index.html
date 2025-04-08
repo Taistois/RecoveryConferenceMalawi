@@ -1,80 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Recovery Conference Registration</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <img src="header.jpg" alt="Conference Header"/>
-  </header>
+<form id="registrationForm">
+  <input type="text" id="name" placeholder="Full Name" required />
+  <select id="gender" required>
+    <option value="">Select Gender</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+    <option value="Other">Other</option>
+  </select>
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="tel" id="contact" placeholder="Contact Number" required />
+  
+  <button type="submit">Register</button>
+</form>
 
-  <main>
-    <form id="regForm">
-      <h2>Registration Form</h2>
-      <input type="text" id="name" placeholder="Full Name" required />
-      <select id="gender" required>
-        <option value="">Select Gender</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-      </select>
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="tel" id="contact" placeholder="Contact Number" required />
-      <label>Payment Method:</label>
-      <label><input type="radio" name="paymentOption" value="Card Payment" /> Card Payment</label>
-      <label><input type="radio" name="paymentOption" value="Pay to Bank" /> Pay to Bank</label>
+<script>
+  document.getElementById("registrationForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      <label for="proof">Upload Proof of Payment (Optional):</label>
-      <input type="file" id="proof" />
+    const formData = {
+      name: document.getElementById("name").value,
+      gender: document.getElementById("gender").value,
+      email: document.getElementById("email").value,
+      contact: document.getElementById("contact").value,
+    };
 
-      <button type="submit">Submit</button>
-    </form>
-
-    <div id="message"></div>
-  </main>
-
-  <script>
-    document.getElementById("regForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const fileInput = document.getElementById("proof");
-      let proofUrl = "";
-
-      if (fileInput.files[0]) {
-        proofUrl = URL.createObjectURL(fileInput.files[0]); // Temporary URL
-      }
-
-      const formData = {
-        name: document.getElementById("name").value,
-        gender: document.getElementById("gender").value,
-        email: document.getElementById("email").value,
-        contact: document.getElementById("contact").value,
-        paymentOption: document.querySelector('input[name="paymentOption"]:checked')?.value || "",
-        proofUrl,
-      };
-
-      const response = await fetch("/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-      const msgBox = document.getElementById("message");
-      msgBox.style.display = "block";
-
-      if (response.ok) {
-        msgBox.style.color = "green";
-        msgBox.innerText = result.message;
-        document.getElementById("regForm").reset();
-      } else {
-        msgBox.style.color = "red";
-        msgBox.innerText = result.message;
-      }
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
     });
-  </script>
-</body>
-</html>
+
+    const data = await res.json();
+    alert(data.message);
+  });
+</script>

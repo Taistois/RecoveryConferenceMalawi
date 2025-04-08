@@ -7,8 +7,6 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const admin = require("firebase-admin");
-
 // Log for debugging
 console.log("🔐 Decoding service account...");
 

@@ -7,18 +7,23 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Decode base64-encoded Firebase key
-const serviceAccount = JSON.parse(
-  Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('utf8')
-);
+const admin = require("firebase-admin");
 
-// Initialize Firebase Admin
+// Log for debugging
+console.log("🔐 Decoding service account...");
+
+const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString("utf8");
+
+console.log("✅ Decoded key preview:", decoded.substring(0, 100)); // Preview part of it
+
+const serviceAccount = JSON.parse(decoded);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
-
+console.log("✅ Firebase initialized.");
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -52,7 +57,7 @@ app.post("/register", async (req, res) => {
 
     return res.status(200).json({ message: "Registration successful!" });
   } catch (error) {
-    console.error("🔥 Firestore error:", error);
+    console.error("Firestore error:", error);
     return res.status(500).json({ message: "An error occurred while registering. Try again." });
   }
 });

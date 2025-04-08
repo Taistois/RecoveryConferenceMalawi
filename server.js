@@ -7,12 +7,11 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Load Firebase service account
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json'); // use correct path
+// Firebase Admin SDK setup using env var
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
@@ -20,21 +19,18 @@ const db = admin.firestore();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("public")); // Serve index.html & assets
+app.use(express.static("public"));
 
-// Serve the frontend
+// Serve frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Registration endpoint
+// Register endpoint
 app.post("/register", async (req, res) => {
   const { name, gender, email, contact } = req.body;
 
-  console.log("Incoming Registration:", req.body);
-
   try {
-    // Check if user already registered with same email
     const existing = await db.collection("registrations")
       .where("email", "==", email)
       .get();
@@ -43,7 +39,6 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "You've already registered with this email." });
     }
 
-    // Add to Firestore
     await db.collection("registrations").add({
       name,
       gender,
@@ -59,7 +54,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });

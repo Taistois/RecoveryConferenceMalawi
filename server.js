@@ -4,7 +4,8 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const path = require("path"); // Required to serve HTML
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 
 // Initialize Firebase Admin
 const serviceAccount = require("./serviceAccountKey.json");

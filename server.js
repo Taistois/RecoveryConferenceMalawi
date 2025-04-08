@@ -27,9 +27,13 @@ app.post('/register', upload.single('proof'), (req, res) => {
   const data = req.body;
   const file = req.file;
 
-  console.log('Form submitted:');
+  console.log('Form Submitted:');
   console.log('Data:', data);
-  console.log('Uploaded file:', file);
+  if (file) {
+    console.log('Uploaded File:', file.filename);
+  } else {
+    console.log('No file uploaded.');
+  }
 
   res.send(`<h2>Thank you, ${data.name}! Your registration is complete.</h2>`);
 });

@@ -1,44 +1,50 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const admin = require("firebase-admin");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Set static folder
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+// Initialize Firebase Admin
+const serviceAccount = require("./serviceAccountKey.json"); // from Firebase Console
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+const db = admin.firestore();
 
-// Set view folder
-app.use(express.static('views'));
+app.use(cors());
+app.use(bodyParser.json());
 
-// Multer setup for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+app.post("/register", async (req, res) => {
+  const { name, gender, email, contact, accommodation, paymentOption, proofUrl } = req.body;
+
+  try {
+    // Check for duplicates
+    const existing = await db.collection("registrations")
+      .where("email", "==", email)
+      .get();
+
+    if (!existing.empty) {
+      return res.status(400).json({ message: "You've already registered with this email." });
+    }
+
+    // Save new record
+    await db.collection("registrations").add({
+      name,
+      gender,
+      email,
+      contact,
+      accommodation,
+      paymentOption,
+      proofUrl: proofUrl || "",
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({ message: "Registration successful!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Something went wrong!" });
   }
 });
-const upload = multer({ storage });
 
-// POST route for form submission
-app.post('/register', upload.single('proof'), (req, res) => {
-  const data = req.body;
-  const file = req.file;
-
-  console.log('Form Submitted:');
-  console.log('Data:', data);
-  if (file) {
-    console.log('Uploaded File:', file.filename);
-  } else {
-    console.log('No file uploaded.');
-  }
-
-  res.send(`<h2>Thank you, ${data.name}! Your registration is complete.</h2>`);
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

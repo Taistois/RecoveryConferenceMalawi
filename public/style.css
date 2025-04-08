@@ -1,79 +1,50 @@
 body {
-    margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: #f8f9fa;
-    color: #222;
-  }
-  
-  header {
-    text-align: center;
-    color: white;
-    background: black;
-    position: relative;
+    margin: 0;
+    background-color: #f1f1f1;
   }
   
   header img {
     width: 100%;
-    height: 250px;
+    max-height: 300px;
     object-fit: cover;
-    opacity: 0.7;
   }
   
-  header h1, header p {
-    position: absolute;
-    width: 100%;
-    left: 0;
-    text-shadow: 2px 2px #000;
-  }
-  
-  header h1 {
-    top: 40%;
-    font-size: 2.5rem;
-  }
-  
-  header p {
-    top: 60%;
-    font-size: 1.2rem;
-  }
-  
-  .container {
+  main {
     max-width: 600px;
-    background: white;
     margin: 2rem auto;
-    padding: 2rem;
+    background: white;
+    padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    border-top: 6px solid #d32f2f; /* Malawi red */
   }
   
-  form label {
-    display: block;
-    margin-top: 1rem;
-    font-weight: 600;
+  form h2 {
+    color: #a81d23;
+    text-align: center;
   }
   
-  form input, form select {
+  input, select, button {
     width: 100%;
     padding: 10px;
-    margin-top: 5px;
+    margin: 8px 0;
+    border-radius: 5px;
     border: 1px solid #ccc;
-    border-radius: 6px;
   }
   
   button {
-    margin-top: 1.5rem;
-    padding: 12px;
-    width: 100%;
-    background: #2e7d32; /* Malawi green */
+    background-color: #a81d23;
     color: white;
-    font-size: 1rem;
-    border: none;
-    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s;
   }
   
   button:hover {
-    background: #1b5e20;
+    background-color: #82171b;
+  }
+  
+  #message {
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
   }
   

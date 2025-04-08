@@ -57,6 +57,21 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// 🔐 Admin dashboard data route
+app.get("/admin/registrations", async (req, res) => {
+  try {
+    const snapshot = await db.collection("registrations").orderBy("timestamp", "desc").get();
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(),
+      timestamp: doc.data().timestamp?.toDate().toISOString() || "N/A"
+    }));
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Error fetching registrations:", err);
+    res.status(500).json({ error: "Failed to fetch data." });
+  }
+});
+
 // 🚀 Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);

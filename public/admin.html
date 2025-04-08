@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Registrations</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; display: none; }
+    th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f4f4f4; }
+    #login { margin-top: 100px; text-align: center; }
+    input[type="password"] { padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; margin-left: 10px; }
+    h1 { color: #333; }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h2>Admin Access</h2>
+    <input type="password" id="adminPass" placeholder="Enter password" />
+    <button onclick="login()">Login</button>
+    <p id="error" style="color: red;"></p>
+  </div>
+
+  <h1 style="display:none;">Admin Dashboard</h1>
+  <div id="actions" style="display: none; margin-bottom: 20px;">
+    <button onclick="exportCSV()">⬇️ Export CSV</button>
+    <button onclick="exportPDF()">⬇️ Export PDF</button>
+  </div>
+  <table id="registrations">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Email</th>
+        <th>Contact</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  const PASSWORD = "admin123"; // 🔐 Change as needed
+
+  function login() {
+    const input = document.getElementById("adminPass").value;
+    const error = document.getElementById("error");
+
+    if (input === PASSWORD) {
+      document.getElementById("login").style.display = "none";
+      document.querySelector("h1").style.display = "block";
+      document.getElementById("registrations").style.display = "table";
+      document.getElementById("actions").style.display = "block";
+      loadData();
+    } else {
+      error.textContent = "Incorrect password.";
+    }
+  }
+
+  let allData = [];
+
+  function loadData() {
+    fetch('/admin/registrations')
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = "";
+        data.forEach(doc => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${doc.name}</td>
+            <td>${doc.gender}</td>
+            <td>${doc.email}</td>
+            <td>${doc.contact}</td>
+            <td>${new Date(doc.timestamp).toLocaleString()}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading data:", err);
+        alert("Failed to load registrations.");
+      });
+  }
+
+  function exportCSV() {
+    const csvRows = [["Name", "Gender", "Email", "Contact", "Timestamp"]];
+    allData.forEach(doc => {
+      csvRows.push([
+        doc.name,
+        doc.gender,
+        doc.email,
+        doc.contact,
+        new Date(doc.timestamp).toLocaleString()
+      ]);
+    });
+
+    const csvContent = csvRows.map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "registrations.csv";
+    link.click();
+  }
+
+  async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Registrations", 14, 16);
+
+    const headers = [["Name", "Gender", "Email", "Contact", "Timestamp"]];
+    const rows = allData.map(doc => [
+      doc.name,
+      doc.gender,
+      doc.email,
+      doc.contact,
+      new Date(doc.timestamp).toLocaleString()
+    ]);
+
+    doc.autoTable({
+      head: headers,
+      body: rows,
+      startY: 20
+    });
+
+    doc.save("registrations.pdf");
+  }
+</script>
+
+<!-- AutoTable plugin for jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+  </script>
+</body>
+</html>

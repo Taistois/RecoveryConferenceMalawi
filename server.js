@@ -16,7 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post("/register", async (req, res) => {
-  const { name, gender, email, contact, accommodation, paymentOption, proofUrl } = req.body;
+  const { name, gender, email, contact, paymentOption, proofUrl } = req.body;
 
   try {
     // Check for duplicates
@@ -34,7 +34,6 @@ app.post("/register", async (req, res) => {
       gender,
       email,
       contact,
-      accommodation,
       paymentOption,
       proofUrl: proofUrl || "",
       timestamp: admin.firestore.FieldValue.serverTimestamp(),

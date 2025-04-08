@@ -23,14 +23,6 @@
       </select>
       <input type="email" id="email" placeholder="Email" required />
       <input type="tel" id="contact" placeholder="Contact Number" required />
-
-      <label for="accommodation">Accommodation:</label>
-      <select id="accommodation" required>
-        <option value="">Choose option</option>
-        <option>BICC</option>
-        <option>Golden Peacock</option>
-      </select>
-
       <label>Payment Method:</label>
       <label><input type="radio" name="paymentOption" value="Card Payment" /> Card Payment</label>
       <label><input type="radio" name="paymentOption" value="Pay to Bank" /> Pay to Bank</label>
@@ -60,7 +52,6 @@
         gender: document.getElementById("gender").value,
         email: document.getElementById("email").value,
         contact: document.getElementById("contact").value,
-        accommodation: document.getElementById("accommodation").value,
         paymentOption: document.querySelector('input[name="paymentOption"]:checked')?.value || "",
         proofUrl,
       };

@@ -1,21 +1,27 @@
 {
   "name": "registration-form",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Taistois/RecoveryConferenceMalawi.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Taistois/RecoveryConferenceMalawi/issues"
+  },
+  "homepage": "https://github.com/Taistois/RecoveryConferenceMalawi#readme",
   "description": "",
   "dependencies": {
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "firebase": "^11.6.0",
-    "firebase-admin": "^13.2.0",
-    "multer": "^1.4.5-lts.2",
-    "path": "^0.12.7"
+    "firebase-admin": "^13.2.0"
   }
 }

@@ -34,15 +34,15 @@
         <th>Gender</th>
         <th>Email</th>
         <th>Contact</th>
+        <th>SOP</th>
+        <th>Others Registered</th>
         <th>Timestamp</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
   const PASSWORD = "admin123"; // 🔐 Change as needed
 
@@ -77,7 +77,9 @@
             <td>${doc.gender}</td>
             <td>${doc.email}</td>
             <td>${doc.contact}</td>
-            <td>${new Date(doc.timestamp).toLocaleString()}</td>
+            <td>${doc.sop || ''}</td>
+            <td>${(doc.others && doc.others.length > 0) ? doc.others.join(", ") : ''}</td>
+          <td>${doc.timestamp ? new Date(doc.timestamp._seconds * 1000).toLocaleString() : "N/A"}</td>
           `;
           tbody.appendChild(row);
         });
@@ -89,13 +91,15 @@
   }
 
   function exportCSV() {
-    const csvRows = [["Name", "Gender", "Email", "Contact", "Timestamp"]];
+    const csvRows = [["Name", "Gender", "Email", "Contact", "SOP", "Others Registered", "Timestamp"]];
     allData.forEach(doc => {
       csvRows.push([
         doc.name,
         doc.gender,
         doc.email,
         doc.contact,
+        doc.sop || '',
+        (doc.others && doc.others.length > 0) ? `"${doc.others.join(", ")}"` : '',
         new Date(doc.timestamp).toLocaleString()
       ]);
     });
@@ -114,12 +118,14 @@
     doc.setFontSize(14);
     doc.text("Registrations", 14, 16);
 
-    const headers = [["Name", "Gender", "Email", "Contact", "Timestamp"]];
+    const headers = [["Name", "Gender", "Email", "Contact", "SOP", "Others Registered", "Timestamp"]];
     const rows = allData.map(doc => [
       doc.name,
       doc.gender,
       doc.email,
       doc.contact,
+      doc.sop || '',
+      (doc.others && doc.others.length > 0) ? doc.others.join(", ") : '',
       new Date(doc.timestamp).toLocaleString()
     ]);
 
@@ -133,9 +139,7 @@
   }
 </script>
 
-<!-- AutoTable plugin for jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
-  </script>
 </body>
 </html>

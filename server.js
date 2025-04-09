@@ -78,7 +78,23 @@ app.post("/register", async (req, res) => {
     return res.status(500).json({ message: "An error occurred while registering. Try again." });
   }
 });
+
+app.get("/admin/registrations", async (req, res) => {
+  try {
+    const snapshot = await db.collection("registrations").orderBy("timestamp", "desc").get();
+    const registrations = [];
+
+    snapshot.forEach(doc => {
+      registrations.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.json(registrations);
+  } catch (error) {
+    console.error("❌ Failed to fetch registrations:", error);
+    res.status(500).json({ message: "Error loading registrations" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
-

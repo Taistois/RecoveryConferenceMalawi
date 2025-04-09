@@ -25,6 +25,16 @@
       <input type="email" id="email" placeholder="Email" required />
       <input type="tel" id="contact" placeholder="Contact Number" required />
 
+      <label for="sop">Are you SOP?</label>
+      <select id="sop" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="others">List other people you're registering (optional, comma separated)</label>
+      <input type="text" id="others" placeholder="e.g. John Doe, Jane Doe" />
+
       <button type="submit" id="submitBtn">Register</button>
       <div id="message"></div>
     </form>
@@ -45,6 +55,11 @@
         gender: document.getElementById("gender").value,
         email: document.getElementById("email").value,
         contact: document.getElementById("contact").value,
+        sop: document.getElementById("sop").value,
+        others: document.getElementById("others").value
+          .split(",")
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0),
       };
 
       try {

@@ -80,10 +80,10 @@
             <td>${doc.gender}</td>
             <td>${doc.email}</td>
             <td>${doc.contact}</td>
-            <td>${doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No"}</td>
+            <td>${doc.sop}</td>
             <td>${doc.joinSOP || ''}</td>
             <td>${(doc.others && doc.others.length > 0) ? doc.others.join(", ") : ''}</td>
-           <td>${new Date(doc.timestamp).toLocaleString()}</td>
+            <td>${doc.timestamp || 'Not Available'}</td>
           `;
           tbody.appendChild(row);
         });
@@ -102,10 +102,10 @@
         doc.gender,
         doc.email,
         doc.contact,
-        doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No",
+        doc.sop,
         doc.joinSOP || '',
         (doc.others && doc.others.length > 0) ? `"${doc.others.join(", ")}"` : '',
-        new Date(doc.timestamp._seconds * 1000).toLocaleString()
+        doc.timestamp || 'Not Available'
       ]);
     });
 
@@ -129,10 +129,10 @@
       doc.gender,
       doc.email,
       doc.contact,
-      doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No",
+      doc.sop,
       doc.joinSOP || '',
       (doc.others && doc.others.length > 0) ? doc.others.join(", ") : '',
-      new Date(doc.timestamp._seconds * 1000).toLocaleString()
+      doc.timestamp || 'Not Available'
     ]);
 
     doc.autoTable({

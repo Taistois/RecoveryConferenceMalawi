@@ -33,9 +33,16 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, gender, email, contact, sop, joinSOP, others = [] } = req.body;
+  let { name, gender, email, contact, sop, joinSOP, others = [] } = req.body;
 
   try {
+    // Ensure "others" is always an array
+    if (typeof others === "string") {
+      others = others.split(",").map(o => o.trim()).filter(Boolean);
+    } else if (!Array.isArray(others)) {
+      others = [];
+    }
+
     const existing = await db.collection("registrations").where("email", "==", email).get();
     if (!existing.empty) {
       return res.status(400).json({ message: "You've already registered with this email." });
@@ -55,15 +62,17 @@ app.post("/register", async (req, res) => {
     const templatePath = path.join(__dirname, "emailTemplate.html");
     let rawTemplate = fs.readFileSync(templatePath, "utf8");
 
-    const othersList = others.length > 0 
-      ? `<p><strong>You also registered the following:</strong><br>${others.map(o => `• ${o}`).join("<br>")}</p>` 
+    const othersList = Array.isArray(others) && others.length > 0
+      ? `<p><strong>You also registered the following:</strong><br>${others.map(o => `• ${o}`).join("<br>")}</p>`
       : "";
 
-    const joinSOPText = joinSOP ? `<p><strong>Would like to join SOP:</strong> ${joinSOP}</p>` : "";
+    const joinSOPText = joinSOP
+      ? `<p><strong>Would like to join Son of Prophet (SOP):</strong> ${joinSOP}</p>`
+      : "";
 
     const customizedHTML = rawTemplate
       .replace("{{name}}", name)
-      .replace("{{sop}}", sop)
+      .replace("{{sop}}", sop === "Yes" ? "Yes (Son of Prophet)" : sop)
       .replace("{{joinSOP}}", joinSOPText)
       .replace("{{others}}", othersList);
 
@@ -83,27 +92,43 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// 🔐 Admin route to fetch all registrations
+// ✅ Admin route with safe timestamp fix
 app.get("/admin/registrations", async (req, res) => {
   try {
     const snapshot = await db.collection("registrations").orderBy("timestamp", "desc").get();
-    const registrations = snapshot.docs.map(doc => {
-      const data = doc.data();
+    const data = snapshot.docs.map(doc => {
+      const d = doc.data();
+      let formattedDate = "Not Available";
+
+      if (d.timestamp && typeof d.timestamp.toDate === "function") {
+        const dateObj = d.timestamp.toDate();
+        if (!isNaN(dateObj.getTime())) {
+          formattedDate = dateObj.toLocaleString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+        }
+      }
+
       return {
-        name: data.name,
-        gender: data.gender,
-        email: data.email,
-        contact: data.contact,
-        sop: data.sop || "",
-        joinSOP: data.joinSOP || "",
-        others: data.others || [],
-        timestamp: data.timestamp ? data.timestamp.toDate() : null,
+        name: d.name || "",
+        gender: d.gender || "",
+        email: d.email || "",
+        contact: d.contact || "",
+        sop: d.sop === "Yes" ? "Yes (Son of Prophet)" : d.sop || "",
+        others: Array.isArray(d.others) ? d.others : [],
+        timestamp: formattedDate,
       };
     });
-    res.json(registrations);
+
+    res.json(data);
   } catch (err) {
-    console.error("❌ Failed to load admin registrations:", err);
-    res.status(500).json({ message: "Failed to load registrations" });
+    console.error("❌ Error fetching admin registrations:", err);
+    res.status(500).json({ message: "Failed to fetch registrations." });
   }
 });
 

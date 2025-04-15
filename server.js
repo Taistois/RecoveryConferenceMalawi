@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 console.log("🔐 Initializing Firebase Admin...");
-const serviceAccount = require("/etc/secrets/serviceAccountKey.json");
+const serviceAccount = require("./serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, gender, email, contact, sop, others = [] } = req.body;
+  const { name, gender, email, contact, sop, joinSOP, others = [] } = req.body;
 
   try {
     const existing = await db.collection("registrations").where("email", "==", email).get();
@@ -47,6 +47,7 @@ app.post("/register", async (req, res) => {
       email,
       contact,
       sop,
+      joinSOP,
       others,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -55,12 +56,15 @@ app.post("/register", async (req, res) => {
     let rawTemplate = fs.readFileSync(templatePath, "utf8");
 
     const othersList = others.length > 0 
-      ? `<p><strong>You also registered the following:</strong><br>${others.map(o => `• ${o}`).join("<br>")}</p>`
+      ? `<p><strong>You also registered the following:</strong><br>${others.map(o => `• ${o}`).join("<br>")}</p>` 
       : "";
+
+    const joinSOPText = joinSOP ? `<p><strong>Would like to join SOP:</strong> ${joinSOP}</p>` : "";
 
     const customizedHTML = rawTemplate
       .replace("{{name}}", name)
       .replace("{{sop}}", sop)
+      .replace("{{joinSOP}}", joinSOPText)
       .replace("{{others}}", othersList);
 
     const mailOptions = {
@@ -79,19 +83,27 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// 🔐 Admin route to fetch all registrations
 app.get("/admin/registrations", async (req, res) => {
   try {
     const snapshot = await db.collection("registrations").orderBy("timestamp", "desc").get();
-    const registrations = [];
-
-    snapshot.forEach(doc => {
-      registrations.push({ id: doc.id, ...doc.data() });
+    const registrations = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        name: data.name,
+        gender: data.gender,
+        email: data.email,
+        contact: data.contact,
+        sop: data.sop || "",
+        joinSOP: data.joinSOP || "",
+        others: data.others || [],
+        timestamp: data.timestamp ? data.timestamp.toDate() : null,
+      };
     });
-
     res.json(registrations);
-  } catch (error) {
-    console.error("❌ Failed to fetch registrations:", error);
-    res.status(500).json({ message: "Error loading registrations" });
+  } catch (err) {
+    console.error("❌ Failed to load admin registrations:", err);
+    res.status(500).json({ message: "Failed to load registrations" });
   }
 });
 

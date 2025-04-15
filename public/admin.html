@@ -1,3 +1,4 @@
+<!-- public/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +35,8 @@
         <th>Gender</th>
         <th>Email</th>
         <th>Contact</th>
-        <th>SOP</th>
+        <th>Son of Prophet (SOP)?</th>
+        <th>Would Like to Join to be Son of Prophet (SOP?)</th>
         <th>Others Registered</th>
         <th>Timestamp</th>
       </tr>
@@ -43,8 +45,11 @@
   </table>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 <script>
-  const PASSWORD = "admin123"; // 🔐 Change as needed
+  const PASSWORD = "admin123";
+
+  let allData = [];
 
   function login() {
     const input = document.getElementById("adminPass").value;
@@ -61,8 +66,6 @@
     }
   }
 
-  let allData = [];
-
   function loadData() {
     fetch('/admin/registrations')
       .then(res => res.json())
@@ -77,9 +80,10 @@
             <td>${doc.gender}</td>
             <td>${doc.email}</td>
             <td>${doc.contact}</td>
-            <td>${doc.sop || ''}</td>
+            <td>${doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No"}</td>
+            <td>${doc.joinSOP || ''}</td>
             <td>${(doc.others && doc.others.length > 0) ? doc.others.join(", ") : ''}</td>
-          <td>${doc.timestamp ? new Date(doc.timestamp._seconds * 1000).toLocaleString() : "N/A"}</td>
+           <td>${new Date(doc.timestamp).toLocaleString()}</td>
           `;
           tbody.appendChild(row);
         });
@@ -91,16 +95,17 @@
   }
 
   function exportCSV() {
-    const csvRows = [["Name", "Gender", "Email", "Contact", "SOP", "Others Registered", "Timestamp"]];
+    const csvRows = [["Name", "Gender", "Email", "Contact", "SOP", "Join SOP", "Others Registered", "Timestamp"]];
     allData.forEach(doc => {
       csvRows.push([
         doc.name,
         doc.gender,
         doc.email,
         doc.contact,
-        doc.sop || '',
+        doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No",
+        doc.joinSOP || '',
         (doc.others && doc.others.length > 0) ? `"${doc.others.join(", ")}"` : '',
-        new Date(doc.timestamp).toLocaleString()
+        new Date(doc.timestamp._seconds * 1000).toLocaleString()
       ]);
     });
 
@@ -118,15 +123,16 @@
     doc.setFontSize(14);
     doc.text("Registrations", 14, 16);
 
-    const headers = [["Name", "Gender", "Email", "Contact", "SOP", "Others Registered", "Timestamp"]];
+    const headers = [["Name", "Gender", "Email", "Contact", "SOP", "Join SOP", "Others Registered", "Timestamp"]];
     const rows = allData.map(doc => [
       doc.name,
       doc.gender,
       doc.email,
       doc.contact,
-      doc.sop || '',
+      doc.sop === "Yes" ? "Yes (Son of Prophet)" : "No",
+      doc.joinSOP || '',
       (doc.others && doc.others.length > 0) ? doc.others.join(", ") : '',
-      new Date(doc.timestamp).toLocaleString()
+      new Date(doc.timestamp._seconds * 1000).toLocaleString()
     ]);
 
     doc.autoTable({
@@ -138,8 +144,5 @@
     doc.save("registrations.pdf");
   }
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-
 </body>
 </html>

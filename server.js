@@ -154,6 +154,39 @@ app.get("/admin/registrations", async (req, res) => {
   }
 });
 
+app.get("/admin/sick-data", async (req, res) => {
+  try {
+    const snapshot = await db.collection("sick-registrations").orderBy("timestamp", "desc").get();
+    const data = snapshot.docs.map(doc => {
+      const d = doc.data();
+      let timestamp = "N/A";
+
+      if (d.timestamp && typeof d.timestamp.toDate === "function") {
+        timestamp = d.timestamp.toDate().toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      return {
+        name: d.name || "",
+        problem: d.problem || "",
+        phone: d.phone || "",
+        timestamp,
+      };
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Error fetching sick registrations:", err);
+    res.status(500).json({ message: "Failed to fetch sick registrations." });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });

@@ -58,5 +58,25 @@
       }
     });
   </script>
+  <script>
+    fetch("/admin/sick-data")
+      .then((res) => res.json())
+      .then((data) => {
+        const tbody = document.querySelector("tbody");
+        data.forEach(entry => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${entry.name}</td>
+            <td>${entry.problem}</td>
+            <td>${entry.phone}</td>
+            <td>${entry.timestamp}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(() => {
+        alert("Failed to load sick registrations.");
+      });
+  </script>  
 </body>
 </html>

@@ -92,6 +92,28 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.post("/register-sick", async (req, res) => {
+  const { name, problem, phone } = req.body;
+
+  if (!name || !problem || !phone) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    await db.collection("sick_registrations").add({
+      name,
+      problem,
+      phone,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.status(200).json({ message: "Sick person registered successfully." });
+  } catch (err) {
+    console.error("❌ Error saving sick registration:", err);
+    res.status(500).json({ message: "Failed to register sick person." });
+  }
+});
+
 // ✅ Admin route with safe timestamp fix
 app.get("/admin/registrations", async (req, res) => {
   try {

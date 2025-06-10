@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sick Registration - Recovery Conference</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero-header"></header>
+
+  <main>
+    <form id="sickForm">
+      <h2>Sick Person Registration</h2>
+
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="problem" placeholder="What is the problem?" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+
+      <button type="submit" id="submitBtn">Register</button>
+      <div id="message"></div>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("sickForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const messageDiv = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      messageDiv.textContent = "Submitting...";
+
+      const formData = {
+        name: document.getElementById("name").value,
+        problem: document.getElementById("problem").value,
+        phone: document.getElementById("phone").value,
+      };
+
+      try {
+        const res = await fetch("/register-sick", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await res.json();
+        messageDiv.textContent = data.message;
+
+        if (res.ok) {
+          form.reset();
+        }
+      } catch (err) {
+        messageDiv.textContent = "An error occurred. Please try again.";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -36,7 +36,6 @@ app.post("/register", async (req, res) => {
   let { name, gender, email, contact, sop, joinSOP, others = [] } = req.body;
 
   try {
-    // Ensure "others" is always an array
     if (typeof others === "string") {
       others = others.split(",").map(o => o.trim()).filter(Boolean);
     } else if (!Array.isArray(others)) {
@@ -114,7 +113,6 @@ app.post("/register-sick", async (req, res) => {
   }
 });
 
-// ✅ Admin route with safe timestamp fix
 app.get("/admin/registrations", async (req, res) => {
   try {
     const snapshot = await db.collection("registrations").orderBy("timestamp", "desc").get();
@@ -142,6 +140,7 @@ app.get("/admin/registrations", async (req, res) => {
         email: d.email || "",
         contact: d.contact || "",
         sop: d.sop === "Yes" ? "Yes (Son of Prophet)" : d.sop || "",
+        joinSOP: d.joinSOP || "",
         others: Array.isArray(d.others) ? d.others : [],
         timestamp: formattedDate,
       };
@@ -154,29 +153,33 @@ app.get("/admin/registrations", async (req, res) => {
   }
 });
 
+/// ✅ ADDITION: Sick registration data route
 app.get("/admin/sick-data", async (req, res) => {
   try {
-    const snapshot = await db.collection("sick-registrations").orderBy("timestamp", "desc").get();
+    const snapshot = await db.collection("sick_registrations").orderBy("timestamp", "desc").get();
     const data = snapshot.docs.map(doc => {
       const d = doc.data();
-      let timestamp = "N/A";
+      let formattedDate = "Not Available";
 
       if (d.timestamp && typeof d.timestamp.toDate === "function") {
-        timestamp = d.timestamp.toDate().toLocaleString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
+        const dateObj = d.timestamp.toDate();
+        if (!isNaN(dateObj.getTime())) {
+          formattedDate = dateObj.toLocaleString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+        }
       }
 
       return {
         name: d.name || "",
-        problem: d.problem || "",
         phone: d.phone || "",
-        timestamp,
+        problem: d.problem || "",
+        timestamp: formattedDate,
       };
     });
 
